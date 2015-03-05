@@ -1,10 +1,21 @@
 package org.softwaredistilled.utils;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collection;
 
-import junit.framework.Assert;
-
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.softwaredistilled.properties.MissingKeyException;
 import org.softwaredistilled.properties.NamedProperties;
 
@@ -14,6 +25,8 @@ import org.softwaredistilled.properties.NamedProperties;
  * @author agusmunioz
  * 
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(FileUtils.class)
 public class PropertiesUtilsTest {
 
 	/**
@@ -76,5 +89,111 @@ public class PropertiesUtilsTest {
 					e.getKeys());
 		}
 
+	}
+
+	/**
+	 * Test {@link PropertiesUtils#find(String, String)} when properties files
+	 * are matched.
+	 */
+	@Test
+	public void filesMatched() {
+
+		try {
+
+			File es = new File(getClass().getResource(
+					"/properties/i18n_es.properties").toURI());
+
+			File en = new File(getClass().getResource(
+					"/properties/i18n_en.properties").toURI());
+
+			Collection<File> files = Arrays.asList(es, en);
+
+			PowerMockito.mockStatic(FileUtils.class);
+
+			PowerMockito.when(
+					FileUtils.listFiles(Mockito.isA(File.class),
+							Mockito.isA(WildcardFileFilter.class),
+							Mockito.isA(DirectoryFileFilter.class)))
+					.thenReturn(files);
+
+			Collection<NamedProperties> properties = PropertiesUtils.find("",
+					"i18n_??");
+
+			Assert.assertNotNull("Null properties", properties);
+
+			Assert.assertEquals("Unexpected amount of properties.",
+					files.size(), properties.size());
+
+		} catch (MojoExecutionException e) {
+
+			Assert.fail("Error when looking for existing properties files");
+
+		} catch (URISyntaxException e) {
+			Assert.fail("Error when looking for test properties files");
+		}
+
+	}
+
+	/**
+	 * Test {@link PropertiesUtils#find(String, String)} when properties files
+	 * are found.
+	 */
+	@Test
+	public void filesNotMatched() {
+
+		try {
+
+			Collection<File> files = Arrays.asList();
+
+			PowerMockito.mockStatic(FileUtils.class);
+
+			PowerMockito.when(
+					FileUtils.listFiles(Mockito.isA(File.class),
+							Mockito.isA(WildcardFileFilter.class),
+							Mockito.isA(DirectoryFileFilter.class)))
+					.thenReturn(files);
+
+			Collection<NamedProperties> properties = PropertiesUtils.find("",
+					"i18n_??");
+
+			Assert.assertNotNull("Null properties", properties);
+
+			Assert.assertTrue("Properties returned when not matched",
+					properties.isEmpty());
+
+		} catch (MojoExecutionException e) {
+
+			Assert.fail("Error when looking for non matching properties files");
+
+		}
+	}
+
+	/**
+	 * Test {@link PropertiesUtils#find(String, String)} when there is an error
+	 * loading a properties file.
+	 */
+	@Test
+	public void loadingError() {
+
+		try {
+
+			Collection<File> files = Arrays.asList(new File(
+					"/unexistent/file.properties"));
+
+			PowerMockito.mockStatic(FileUtils.class);
+
+			PowerMockito.when(
+					FileUtils.listFiles(Mockito.isA(File.class),
+							Mockito.isA(WildcardFileFilter.class),
+							Mockito.isA(DirectoryFileFilter.class)))
+					.thenReturn(files);
+
+			PropertiesUtils.find("", "i18n_??");
+
+			Assert.fail("Expected failure in a loading properties error.");
+
+		} catch (MojoExecutionException e) {
+
+		}
 	}
 }

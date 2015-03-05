@@ -60,12 +60,12 @@ public class PropertiesUtils {
 
 			}
 
+			return found;
+
 		} catch (Exception e) {
 			throw new MojoExecutionException("Error when loading properties.",
 					e);
 		}
-
-		return found;
 
 	}
 
