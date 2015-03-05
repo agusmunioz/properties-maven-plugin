@@ -75,7 +75,7 @@
 			<version>1.5.5</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>
@@ -105,5 +105,12 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<scm>
+		<url>https://github.com/agusmunioz/properties-maven-plugin.git</url>
+		<connection>scm:git:git://github.com/agusmunioz/properties-maven-plugin.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/agusmunioz/properties-maven-plugin.git</developerConnection>
+		<tag>master</tag>
+	</scm>
 
 </project>
