@@ -89,7 +89,8 @@ public class CheckPropertiesMojo extends AbstractMojo {
 					"Missing keys in properties files: " + e.getNames()
 							+ ". Keys: " + e.getKeys());
 
-			throw new MojoExecutionException("Missing keys");
+			throw new MojoExecutionException("Missing keys in properties files: " + e.getNames()
+					+ ". Keys: " + e.getKeys());
 		}
 
 	}
